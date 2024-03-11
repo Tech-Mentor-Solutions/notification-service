@@ -28,20 +28,19 @@ func EmailHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Send the email using SendGrid
 	if err := SendSendgrid(emailReq.To, emailReq.Name); err != nil {
-		fmt.Fprintf(w, "Email wasn't sent to %s for %s", emailReq.To, emailReq.Name)
+		fmt.Fprintf(w, "Email wasn't sent to %s", emailReq.To)
 		return
 	}
 
 	// Respond with a confirmation message
-	fmt.Fprintf(w, "Email sent to %s for %s", emailReq.To, emailReq.Name)
-	log.Printf("Email sent to %s for %s", emailReq.To, emailReq.Name)
+	log.Printf("Email sent to %s", emailReq.To)
 }
 
 // Scheduling meeting
 func MeetingHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		log.Println("Failed to read body. Error: ", err.Error())
 		return
 	}
 
@@ -65,34 +64,31 @@ func MeetingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := SendMeetingLink(meetingReq.To, meetingReq.Name, date, time, meetingReq.Url); err != nil {
-		fmt.Fprintf(w, "Email wasn't sent to %s for %s", meetingReq.To, meetingReq.Name)
+		fmt.Fprintf(w, "Email wasn't sent to %s", meetingReq.To)
 		return
 	}
 
-	fmt.Fprintf(w, "Email sent to %s for %s", meetingReq.To, meetingReq.Name)
-	log.Printf("Email sent to %s for %s", meetingReq.To, meetingReq.Name)
+	log.Printf("Email sent to %s", meetingReq.To)
 }
 
-//  Group invite
-
+// Group invite
 func InvitationHandler(w http.ResponseWriter, r *http.Request) {
-	// Read the request body
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		log.Println("Failed to read body. Error: ", err.Error())
 		return
 	}
 
-	// Unmarshal the JSON data into the struct
 	var groupInvite models.GroupInvite
 	if err := json.Unmarshal(body, &groupInvite); err != nil {
 		http.Error(w, "Failed to parse JSON data", http.StatusBadRequest)
 		return
 	}
 
-	// Send the email using SendGrid
-	SendGroupInvite(groupInvite.To, groupInvite.GroupName, groupInvite.Receiver, groupInvite.Sender, groupInvite.Url)
+	if err := SendGroupInvite(groupInvite.To, groupInvite.GroupName, groupInvite.Receiver, groupInvite.Sender, groupInvite.Url); err != nil {
+		fmt.Fprintf(w, "Email wasn't sent to %s", groupInvite.To)
+		return
+	}
 
-	// Respond with a confirmation message
-	fmt.Fprintf(w, "Email sent to %s for %s", groupInvite.To, groupInvite.Receiver)
+	log.Printf("Email sent to %s for %s", groupInvite.To, groupInvite.Receiver)
 }

@@ -16,7 +16,7 @@ type MeetingRequest struct {
 
 type GroupInvite struct {
 	To        string `json:"to"`
-	GroupName string `json:"groupname"`
+	GroupName string `json:"group_name"`
 	Sender    string `json:"sender"`
 	Receiver  string `json:"receiver"`
 	Url       string `json:"url"`

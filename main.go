@@ -4,13 +4,15 @@ import (
 	"log"
 	"net/http"
 
-	emailhandler "github.com/email/handlers"
+	"github.com/email/handlers"
 )
 
 func main() {
-	http.HandleFunc("/registration", emailhandler.EmailHandler)
-	http.HandleFunc("/meetinglink", emailhandler.MeetingHandler)
-	http.HandleFunc("/invitegroup", emailhandler.InvitationHandler)
+	// Registering handlers for different endpoints
+	http.HandleFunc("/registration", handlers.RegistrationHandler)
+	http.HandleFunc("/meetinglink", handlers.MeetingHandler)
+	http.HandleFunc("/invitegroup", handlers.InvitationHandler)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// Starting the HTTP server
+	log.Println(http.ListenAndServe(":8080", nil))
 }

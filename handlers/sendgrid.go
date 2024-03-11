@@ -11,7 +11,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-func SendSendgrid(to string, name string) error {
+func SendRegistration(to string, name string) error {
 	from := mail.NewEmail("Mentorship", "kiran@ini8labs.tech")
 	recipient := mail.NewEmail("Recipient", to)
 
@@ -33,8 +33,6 @@ func SendSendgrid(to string, name string) error {
 	// Add recipients
 	p := mail.NewPersonalization()
 	p.AddTos(recipient)
-
-	// p.Subject = ""
 
 	// Add personalization to message
 	message.AddPersonalizations(p)
@@ -73,9 +71,6 @@ func SendMeetingLink(to string, name string, date time.Time, time time.Time, url
 
 	p := mail.NewPersonalization()
 	p.AddTos(recipient)
-
-	// Set subject (you can add your own subject if needed)
-	// p.Subject = ""
 
 	// Add personalization to message
 	message.AddPersonalizations(p)

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/email/handlers"
+	"github.com/Tech-Mentor-Solutions/notification-service/handlers"
 )
 
 func main() {
@@ -14,5 +14,5 @@ func main() {
 	http.HandleFunc("/invitegroup", handlers.InvitationHandler)
 
 	// Starting the HTTP server
-	log.Println(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

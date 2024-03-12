@@ -5,28 +5,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/email/models"
+	"github.com/Tech-Mentor-Solutions/notification-service/models"
 	"github.com/joho/godotenv"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-)
-
-var (
-	sendgridAPIKey         string
-	registrationTemplateID string
-	meetingTemplateID      string
-	invitationTemplateID   string
 )
 
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Error loading .env file: ", err.Error())
 	}
-
-	sendgridAPIKey = os.Getenv("SENDGRID_API_KEY")
-	registrationTemplateID = os.Getenv("REGISTRATION_TEMPLATE_ID")
-	meetingTemplateID = os.Getenv("MEETING_TEMPLATE_ID")
-	invitationTemplateID = os.Getenv("INVITATION_TEMPLATE_ID")
 }
 
 func SendRegistration(emailReq models.EmailRequest) error {
@@ -36,7 +24,7 @@ func SendRegistration(emailReq models.EmailRequest) error {
 	// Create a dynamic template message
 	message := mail.NewV3Mail()
 	message.SetFrom(from)
-	message.SetTemplateID(registrationTemplateID)
+	message.SetTemplateID(os.Getenv("REGISTRATION_TEMPLATE_ID"))
 
 	// Add recipients
 	p := mail.NewPersonalization()
@@ -47,7 +35,7 @@ func SendRegistration(emailReq models.EmailRequest) error {
 
 	p.SetDynamicTemplateData("name", emailReq.Name)
 
-	client := sendgrid.NewSendClient(sendgridAPIKey)
+	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 	_, err := client.Send(message)
 	if err != nil {
 		log.Println(err)
@@ -63,7 +51,7 @@ func SendMeetingLink(meetingReq models.MeetingRequest) error {
 
 	message := mail.NewV3Mail()
 	message.SetFrom(from)
-	message.SetTemplateID(meetingTemplateID)
+	message.SetTemplateID(os.Getenv("MEETING_TEMPLATE_ID"))
 
 	p := mail.NewPersonalization()
 	p.AddTos(recipient)
@@ -77,7 +65,7 @@ func SendMeetingLink(meetingReq models.MeetingRequest) error {
 	p.SetDynamicTemplateData("date", formattedDate)
 	p.SetDynamicTemplateData("url", meetingReq.Url)
 
-	client := sendgrid.NewSendClient(sendgridAPIKey)
+	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 	_, err := client.Send(message)
 	if err != nil {
 		log.Println(err)
@@ -94,7 +82,7 @@ func SendGroupInvite(groupInvite models.GroupInvite) error {
 
 	message := mail.NewV3Mail()
 	message.SetFrom(from)
-	message.SetTemplateID(invitationTemplateID)
+	message.SetTemplateID(os.Getenv("INVITATION_TEMPLATE_ID"))
 
 	p := mail.NewPersonalization()
 	p.AddTos(recipient)
@@ -102,11 +90,11 @@ func SendGroupInvite(groupInvite models.GroupInvite) error {
 	message.AddPersonalizations(p)
 
 	p.SetDynamicTemplateData("receiver", groupInvite.Receiver)
-	p.SetDynamicTemplateData("sender", groupInvite.Sender)
+	p.SetDynamicTemplateData("name", groupInvite.Receiver)
 	p.SetDynamicTemplateData("groupname", groupInvite.GroupName)
 	p.SetDynamicTemplateData("url", groupInvite.Url)
 
-	client := sendgrid.NewSendClient(sendgridAPIKey)
+	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 	_, err := client.Send(message)
 	if err != nil {
 		log.Println("Failed to send message ", err.Error())

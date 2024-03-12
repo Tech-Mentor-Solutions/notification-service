@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/email/models"
+	"github.com/Tech-Mentor-Solutions/notification-service/models"
 )
 
 func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,9 +27,9 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if emailReq.To == "" {
-		log.Println("Email is required")
+		log.Println("Sender email id is blank")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Email is required!!"))
+		w.Write([]byte("Sender email id is blank!!"))
 		return
 	}
 	if emailReq.Name == "" {
@@ -39,12 +39,12 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	// Send the email using SendGrid
 	if err := SendRegistration(emailReq); err != nil {
 		http.Error(w, "Failed to send mail", http.StatusInternalServerError)
-		log.Println("Failed to send registration email:", err.Error())
+		log.Println("Failed to send registration email: ", err.Error())
 		return
 	}
 
 	// Respond with a confirmation message
-	log.Printf("Email sent to %s", emailReq.To)
+	log.Println("Email sent to ", emailReq.To)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Email sent successfully"))
 }
@@ -65,10 +65,22 @@ func MeetingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if meetingReq.To == "" || meetingReq.Url == "" || meetingReq.Timestamp == 0 {
-		log.Println("Insufficient data")
+	if meetingReq.To == "" {
+		log.Println("Sender email id is blank")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Insufficient data"))
+		w.Write([]byte("Sender email id is blank \n"))
+		return
+	}
+	if meetingReq.Url == "" {
+		log.Println("URL is blank")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("URL is blank \n"))
+		return
+	}
+	if meetingReq.Timestamp == 0 {
+		log.Println("Timestamp is blank")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Timestamp is blank \n"))
 		return
 	}
 
@@ -99,14 +111,31 @@ func InvitationHandler(w http.ResponseWriter, r *http.Request) {
 	var groupInvite models.GroupInvite
 	if err := json.Unmarshal(body, &groupInvite); err != nil {
 		log.Println("Failed to parse the JSON data. Error: ", err.Error())
+		http.Error(w, "Failed to parse the JSON data.", http.StatusBadRequest)
 		return
 	}
 
-	if groupInvite.To == "" || groupInvite.GroupName == "" || groupInvite.Url == "" {
-		log.Println("Insufficient data")
+	if groupInvite.To == "" {
+		log.Println("Sender email id is blank")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Insufficient data"))
+		w.Write([]byte("Sender email id is blank \n"))
 		return
+	}
+	if groupInvite.GroupName == "" {
+		log.Println("Group Name is blank")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Group Name is blank \n"))
+		return
+	}
+	if groupInvite.Url == "" {
+		log.Println("URL is blank")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("URL is blank \n"))
+		return
+	}
+
+	if groupInvite.Receiver == "" {
+		groupInvite.Receiver = "User"
 	}
 
 	if err := SendGroupInvite(groupInvite); err != nil {
@@ -115,7 +144,7 @@ func InvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Email sent to %s", groupInvite.To)
+	log.Println("Email sent to ", groupInvite.To)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Email sent successfully"))
 

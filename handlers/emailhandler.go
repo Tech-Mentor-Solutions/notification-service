@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/email/models"
 )
@@ -27,8 +26,18 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if emailReq.To == "" {
+		log.Println("Email is required")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Email is required!!"))
+		return
+	}
+	if emailReq.Name == "" {
+		emailReq.Name = "User"
+	}
+
 	// Send the email using SendGrid
-	if err := SendRegistration(emailReq.To, emailReq.Name); err != nil {
+	if err := SendRegistration(emailReq); err != nil {
 		http.Error(w, "Failed to send mail", http.StatusInternalServerError)
 		log.Println("Failed to send registration email:", err.Error())
 		return
@@ -56,22 +65,18 @@ func MeetingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse date and time strings into time.Time objects
-	date, err := time.Parse("2006-01-02", meetingReq.Date)
-	if err != nil {
-		log.Println("Failed to parse date:", err.Error())
-		http.Error(w, "Failed to parse date", http.StatusBadRequest)
+	if meetingReq.To == "" || meetingReq.Url == "" || meetingReq.Timestamp == 0 {
+		log.Println("Insufficient data")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Insufficient data"))
 		return
 	}
 
-	time, err := time.Parse("15:04:05", meetingReq.Time)
-	if err != nil {
-		log.Println("Failed to parse time:", err.Error())
-		http.Error(w, "Failed to parse time", http.StatusBadRequest)
-		return
+	if meetingReq.Name == "" {
+		meetingReq.Name = "User"
 	}
 
-	if err := SendMeetingLink(meetingReq.To, meetingReq.Name, date, time, meetingReq.Url); err != nil {
+	if err := SendMeetingLink(meetingReq); err != nil {
 		log.Println("Failed to send email. Error: ", err.Error())
 		http.Error(w, "Failed to send email", http.StatusInternalServerError)
 		return
@@ -97,7 +102,14 @@ func InvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := SendGroupInvite(groupInvite.To, groupInvite.GroupName, groupInvite.Receiver, groupInvite.Sender, groupInvite.Url); err != nil {
+	if groupInvite.To == "" || groupInvite.GroupName == "" || groupInvite.Url == "" {
+		log.Println("Insufficient data")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Insufficient data"))
+		return
+	}
+
+	if err := SendGroupInvite(groupInvite); err != nil {
 		log.Println("Failed to send email. Error: ", err.Error())
 		http.Error(w, "Failed to send email", http.StatusInternalServerError)
 		return

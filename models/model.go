@@ -7,11 +7,10 @@ type EmailRequest struct {
 }
 
 type MeetingRequest struct {
-	To   string `json:"to"`
-	Name string `json:"name"`
-	Date string `json:"date"`
-	Time string `json:"time"`
-	Url  string `json:"url"`
+	To        string `json:"to"`
+	Name      string `json:"name"`
+	Timestamp int64  `json:"timestamp"`
+	Url       string `json:"url"`
 }
 
 type GroupInvite struct {

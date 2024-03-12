@@ -25,6 +25,9 @@ go.work
 .vscode/extension.json
 
 
+# Environments
+.env
+
 
 
 

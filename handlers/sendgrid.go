@@ -1,34 +1,42 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"github.com/email/models"
 	"github.com/joho/godotenv"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-func SendRegistration(to string, name string) error {
-	from := mail.NewEmail("Mentorship", "kiran@ini8labs.tech")
-	recipient := mail.NewEmail("Recipient", to)
+var (
+	sendgridAPIKey         string
+	registrationTemplateID string
+	meetingTemplateID      string
+	invitationTemplateID   string
+)
 
+func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Error loading .env file: ", err.Error())
-		return err
 	}
 
-	// Access the SendGrid   key from.Error() the environment
-	sendgridAPIKey := os.Getenv("SENDGRID_API_KEY")
-	templateId := os.Getenv("REGISTRATION_TEMPLATE_ID")
+	sendgridAPIKey = os.Getenv("SENDGRID_API_KEY")
+	registrationTemplateID = os.Getenv("REGISTRATION_TEMPLATE_ID")
+	meetingTemplateID = os.Getenv("MEETING_TEMPLATE_ID")
+	invitationTemplateID = os.Getenv("INVITATION_TEMPLATE_ID")
+}
+
+func SendRegistration(emailReq models.EmailRequest) error {
+	from := mail.NewEmail("Mentorship", "kiran@ini8labs.tech")
+	recipient := mail.NewEmail("Recipient", emailReq.To)
 
 	// Create a dynamic template message
 	message := mail.NewV3Mail()
 	message.SetFrom(from)
-
-	message.SetTemplateID(templateId)
+	message.SetTemplateID(registrationTemplateID)
 
 	// Add recipients
 	p := mail.NewPersonalization()
@@ -37,99 +45,72 @@ func SendRegistration(to string, name string) error {
 	// Add personalization to message
 	message.AddPersonalizations(p)
 
-	p.SetDynamicTemplateData("name", name)
+	p.SetDynamicTemplateData("name", emailReq.Name)
 
 	client := sendgrid.NewSendClient(sendgridAPIKey)
-	response, err := client.Send(message)
+	_, err := client.Send(message)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	log.Println(response.Body)
-	log.Println(response.StatusCode)
-	log.Println(response.Headers)
 	return nil
 }
 
 // sending meeting link
-func SendMeetingLink(to string, name string, date time.Time, time time.Time, url string) error {
+func SendMeetingLink(meetingReq models.MeetingRequest) error {
 	from := mail.NewEmail("Mentorship", "kiran@ini8labs.tech")
-	recipient := mail.NewEmail("Recipient", to)
-
-	if err := godotenv.Load(); err != nil {
-		log.Println("Error loading .env file: ", err.Error())
-		return err
-	}
-
-	sendgridAPIKey := os.Getenv("SENDGRID_API_KEY")
-	templateId := os.Getenv("MEETING_TEMPLATE_ID")
+	recipient := mail.NewEmail("Recipient", meetingReq.To)
 
 	message := mail.NewV3Mail()
 	message.SetFrom(from)
-
-	message.SetTemplateID(templateId)
+	message.SetTemplateID(meetingTemplateID)
 
 	p := mail.NewPersonalization()
 	p.AddTos(recipient)
 
-	// Add personalization to message
 	message.AddPersonalizations(p)
 
-	p.SetDynamicTemplateData("name", name)
-	p.SetDynamicTemplateData("date", date.Format("2006-01-02"))
-	p.SetDynamicTemplateData("time", time.Format("15:04:05"))
-	p.SetDynamicTemplateData("url", url)
+	t := time.Unix(meetingReq.Timestamp, 0)
+	formattedDate := t.Format(time.UnixDate)
+
+	p.SetDynamicTemplateData("name", meetingReq.Name)
+	p.SetDynamicTemplateData("date", formattedDate)
+	p.SetDynamicTemplateData("url", meetingReq.Url)
 
 	client := sendgrid.NewSendClient(sendgridAPIKey)
-	response, err := client.Send(message)
+	_, err := client.Send(message)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	fmt.Println(response.StatusCode)
-	fmt.Println(response.Body)
-	fmt.Println(response.Headers)
+
 	return nil
 }
 
 // send group invite
-func SendGroupInvite(to string, groupName string, receiver string, sender string, url string) error {
+func SendGroupInvite(groupInvite models.GroupInvite) error {
 	from := mail.NewEmail("Mentorship", "kiran@ini8labs.tech")
-	recipient := mail.NewEmail("Recipient", to)
-
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	sendgridAPIKey := os.Getenv("SENDGRID_API_KEY")
-	templateId := os.Getenv("INVITATION_TEMPLATE_ID")
+	recipient := mail.NewEmail("Recipient", groupInvite.To)
 
 	message := mail.NewV3Mail()
 	message.SetFrom(from)
-
-	message.SetTemplateID(templateId)
+	message.SetTemplateID(invitationTemplateID)
 
 	p := mail.NewPersonalization()
 	p.AddTos(recipient)
 
-	// Set subject (you can add your own subject if needed)
-	// p.Subject = ""
-
 	message.AddPersonalizations(p)
 
-	p.SetDynamicTemplateData("receiver", receiver)
-	p.SetDynamicTemplateData("sender", sender)
-	p.SetDynamicTemplateData("groupname", groupName)
-	p.SetDynamicTemplateData("url", url)
+	p.SetDynamicTemplateData("receiver", groupInvite.Receiver)
+	p.SetDynamicTemplateData("sender", groupInvite.Sender)
+	p.SetDynamicTemplateData("groupname", groupInvite.GroupName)
+	p.SetDynamicTemplateData("url", groupInvite.Url)
 
 	client := sendgrid.NewSendClient(sendgridAPIKey)
-	response, err := client.Send(message)
+	_, err := client.Send(message)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to send message ", err.Error())
 		return err
 	}
-	fmt.Println(response.StatusCode)
-	fmt.Println(response.Body)
-	fmt.Println(response.Headers)
 	return nil
 }

@@ -64,24 +64,25 @@ func MeetingHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to parse JSON data", http.StatusBadRequest)
 		return
 	}
-
-	if meetingReq.To == "" {
-		log.Println("Sender email id is blank")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Sender email id is blank \n"))
-		return
-	}
-	if meetingReq.Url == "" {
-		log.Println("URL is blank")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("URL is blank \n"))
-		return
-	}
-	if meetingReq.Timestamp == 0 {
-		log.Println("Timestamp is blank")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Timestamp is blank \n"))
-		return
+	if meetingReq.To == "" || meetingReq.Url == "" || meetingReq.Timestamp == 0 {
+		if meetingReq.To == "" {
+			log.Println("Sender email id is blank")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Sender email id is blank \n"))
+			return
+		}
+		if meetingReq.Url == "" {
+			log.Println("URL is blank")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("URL is blank \n"))
+			return
+		}
+		if meetingReq.Timestamp == 0 {
+			log.Println("Timestamp is blank")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Timestamp is blank \n"))
+			return
+		}
 	}
 
 	if meetingReq.Name == "" {
@@ -114,24 +115,25 @@ func InvitationHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to parse the JSON data.", http.StatusBadRequest)
 		return
 	}
-
-	if groupInvite.To == "" {
-		log.Println("Sender email id is blank")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Sender email id is blank \n"))
-		return
-	}
-	if groupInvite.GroupName == "" {
-		log.Println("Group Name is blank")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Group Name is blank \n"))
-		return
-	}
-	if groupInvite.Url == "" {
-		log.Println("URL is blank")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("URL is blank \n"))
-		return
+	if groupInvite.To == "" || groupInvite.GroupName == "" || groupInvite.Url == "" {
+		if groupInvite.To == "" {
+			log.Println("Sender email id is blank")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Sender email id is blank \n"))
+			return
+		}
+		if groupInvite.To == "" {
+			log.Println("Group Name is blank")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Group Name is blank \n"))
+			return
+		}
+		if groupInvite.Url == "" {
+			log.Println("URL is blank")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("URL is blank \n"))
+			return
+		}
 	}
 
 	if groupInvite.Receiver == "" {

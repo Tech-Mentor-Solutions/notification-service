@@ -38,8 +38,8 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Send the email using SendGrid
 	if err := SendRegistration(emailReq); err != nil {
-		http.Error(w, "Failed to send mail", http.StatusInternalServerError)
 		log.Println("Failed to send registration email: ", err.Error())
+		http.Error(w, "Failed to send mail", http.StatusInternalServerError)
 		return
 	}
 
@@ -104,8 +104,8 @@ func MeetingHandler(w http.ResponseWriter, r *http.Request) {
 func InvitationHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Failed to read body", http.StatusBadRequest)
 		log.Println("Failed to read body. Error: ", err.Error())
+		http.Error(w, "Failed to read body", http.StatusBadRequest)
 		return
 	}
 
@@ -122,7 +122,7 @@ func InvitationHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("Sender email id is blank \n"))
 			return
 		}
-		if groupInvite.To == "" {
+		if groupInvite.GroupName == "" {
 			log.Println("Group Name is blank")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Group Name is blank \n"))

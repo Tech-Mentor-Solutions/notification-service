@@ -18,7 +18,7 @@ func init() {
 }
 
 func SendRegistration(emailReq models.EmailRequest) error {
-	from := mail.NewEmail("Mentorship", "kiran@ini8labs.tech")
+	from := mail.NewEmail("Mentorship", os.Getenv("FROM"))
 	recipient := mail.NewEmail("Recipient", emailReq.To)
 
 	// Create a dynamic template message
@@ -38,7 +38,7 @@ func SendRegistration(emailReq models.EmailRequest) error {
 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 	_, err := client.Send(message)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to send email ", err.Error())
 		return err
 	}
 	return nil
@@ -46,7 +46,7 @@ func SendRegistration(emailReq models.EmailRequest) error {
 
 // sending meeting link
 func SendMeetingLink(meetingReq models.MeetingRequest) error {
-	from := mail.NewEmail("Mentorship", "kiran@ini8labs.tech")
+	from := mail.NewEmail("Mentorship", os.Getenv("FROM"))
 	recipient := mail.NewEmail("Recipient", meetingReq.To)
 
 	message := mail.NewV3Mail()
@@ -68,7 +68,7 @@ func SendMeetingLink(meetingReq models.MeetingRequest) error {
 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 	_, err := client.Send(message)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to send email ", err.Error())
 		return err
 	}
 
@@ -77,7 +77,7 @@ func SendMeetingLink(meetingReq models.MeetingRequest) error {
 
 // send group invite
 func SendGroupInvite(groupInvite models.GroupInvite) error {
-	from := mail.NewEmail("Mentorship", "kiran@ini8labs.tech")
+	from := mail.NewEmail("Mentorship", os.Getenv("FROM"))
 	recipient := mail.NewEmail("Recipient", groupInvite.To)
 
 	message := mail.NewV3Mail()

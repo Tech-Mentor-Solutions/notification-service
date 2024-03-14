@@ -129,11 +129,12 @@ func InvitationHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if groupInvite.Url == "" {
-			log.Println("URL is blank")
+			log.Println("Url is blank ")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("URL is blank \n"))
 			return
 		}
+
 	}
 
 	if groupInvite.Receiver == "" {
